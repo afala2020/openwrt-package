@@ -1,0 +1,28 @@
+#自动挂载U盘：编辑/etc/hotplug.d/block/10-mount写入以下内容：
+[plain] view plain copy
+#!/bin/ash  
+ 
+case "$ACTION" in
+    add)
+        for i in $(ls /dev/ | grep 'sd[a-z][1-9]')
+        do
+            mkdir -p /mnt/$i
+            mount -o iocharset=utf8,rwx /dev/$i /mnt/$i
+            if [ $? -ne 0 ]
+            then
+                mount -o rwx /dev/$i /mnt/$i
+            fi
+        done
+        ;;
+    remove)
+        MOUNT=`mount | grep -o '/mnt/sd[a-z][1-9]'`
+        for i in $MOUNT
+        do
+            umount $i
+            if [ $? -eq 0 ]
+            then
+                rm -r $i
+            fi
+        done
+        ;;
+esac
